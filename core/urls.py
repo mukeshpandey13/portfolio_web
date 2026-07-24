@@ -7,6 +7,8 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('robots.txt', views.robots, name='robots'),
     path('sitemap.xml', views.sitemap, name='sitemap'),
+    path("api/chatbot/", views.chatbot_api, name="chatbot_api"),
+
 ]
 
 if settings.DEBUG:

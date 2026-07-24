@@ -1,5 +1,9 @@
 {
   "dependencies": {
-    "tailwindcss": "^3.4.17"
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  },
+  "scripts": {
+    "watch:css": "npx @tailwindcss/cli -i ./statics/input.css -o ./statics/style.css --watch"
   }
 }

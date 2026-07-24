@@ -25,10 +25,40 @@
         {% if sections.about_me %}{% include "about.html" %}{% endif %}
         {% if sections.projects %}{% include "projects.html" %}{% endif %}
         {% if sections.skills %}{% include "skills.html" %}{% endif %}
-        {% if sections.process %}{% include "process.html" %}{% endif %}
+        {% if sections.education %}{% include "education.html" %}{% endif %}        
         {% if sections.get_in_touch %}{% include "contact.html" %}{% endif %}
         {% include "footer.html" %}
     </main>
+
+
+    <div id="chat-widget" class="fixed bottom-6 right-6 z-50 font-sans">
+        <button id="chat-toggle" class="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center shadow-lg hover:scale-105 transition">
+        💬
+        </button>
+
+        <div id="chat-window" class="hidden flex-col w-80 h-96 bg-zinc-900 border border-zinc-700 rounded-2xl shadow-xl mt-3 overflow-hidden chat-window-themed">
+            <div class="px-4 py-3 bg-zinc-800 border-b border-zinc-700 chat-header-themed">
+                <span class="text-sm font-semibold text-white chat-header-text">Chatbot</span>
+            </div>
+            <div id="chat-messages" class="flex-1 overflow-y-auto px-3 py-3 space-y-3"></div>
+            <form id="chat-form" data-api-url="{% url 'chatbot_api' %}" class="flex items-center gap-2 px-3 py-2 border-t border-zinc-700 chat-form-themed">
+                <input id="chat-input" type="text" placeholder="Type a message..."
+                    class="flex-1 bg-zinc-800 text-white placeholder-zinc-400 rounded-full px-3 py-2 text-sm outline-none chat-input-themed"
+                    autocomplete="off">
+                <button type="submit" class="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center flex-shrink-0">
+                    ➤
+                </button>
+            </form>
+        </div>
+    </div>
+
+<style>
+   
+</style>
+
+<script>
+  
+</script>
     <script src="{% static "script.js" %}"></script>
 </body>
 </html>

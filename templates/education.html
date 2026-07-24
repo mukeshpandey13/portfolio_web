@@ -1,0 +1,67 @@
+<section id="education-achievements" class="py-24 px-6 lg:px-16 bg-zinc-950">
+    <div class="max-w-6xl mx-auto">
+        <h2 class="section-heading">Education, Experience &amp; Achievements</h2>
+
+        <!-- Education -->
+        <h3 class="text-xl font-mono font-bold mt-12 mb-6 text-gray-200">🎓 Education</h3>
+        <div class="timeline-container">
+            {% for edu in education_list %}
+            <div class="timeline-item" style="--item-index: {{ forloop.counter }};">
+                <h3 class="text-xl font-mono font-bold mb-3">
+                    {{ edu.get_degree_display }}{% if edu.field_of_study %} in {{ edu.field_of_study }}{% endif %}
+                </h3>
+                <p class="text-gray-400 text-sm mb-2 ml-6">
+                    {{ edu.institution }} &middot; {{ edu.duration_display }}
+                    {% if edu.grade %} &middot; {{ edu.grade }}{% endif %}
+                </p>
+                {% if edu.description %}
+                <p class="text-gray-300 mb-6 ml-6">{{ edu.description }}</p>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p class="text-gray-500 italic">No education entries yet.</p>
+            {% endfor %}
+        </div>
+        
+        {% comment %} Experience {% endcomment %}
+        <h3 class="text-xl font-mono font-bold mt-12 mb-6 text-gray-200">💼 Experience</h3>
+        <div class="timeline-container">
+            {% for exp in experience_list %}
+            <div class="timeline-item" style="--item-index: {{ forloop.counter }};">
+                <h3 class="text-xl font-mono font-bold mb-3">
+                    {{ exp.role }} <span class="text-gray-400 font-normal">— {{ exp.company }}</span>
+                </h3>
+                <p class="text-gray-400 text-sm mb-2 ml-6">
+                    {{ exp.get_employment_type_display }} &middot; {{ exp.duration_display }}
+                    {% if exp.location %} &middot; {{ exp.location }}{% endif %}
+                </p>
+                {% if exp.description %}
+                <p class="text-gray-300 mb-6 ml-6">{{ exp.description }}</p>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p class="text-gray-500 italic">No experience entries yet.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Achievements -->
+        <h3 class="text-xl font-mono font-bold mt-16 mb-6 text-gray-200">🏆 Achievements</h3>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for a in featured_achievements %}
+            <div class="border border-zinc-800 rounded-sm p-5 bg-black">
+                <h4 class="font-mono font-bold text-gray-100 mb-1">{{ a.title }}</h4>
+                {% if a.issuer %}<div class="text-sm text-gray-400 mb-1">{{ a.issuer }}</div>{% endif %}
+                <div class="text-xs text-gray-500 mb-3">{{ a.date_awarded|date:"M Y" }}</div>
+                {% if a.credential_url %}
+                <a href="{{ a.credential_url }}" target="_blank" rel="noopener"
+                   class="text-sm text-gray-300 hover:text-white underline underline-offset-2">
+                   View credential →
+                </a>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p class="text-gray-500 italic">No featured achievements yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>

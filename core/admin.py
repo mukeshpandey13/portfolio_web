@@ -36,9 +36,8 @@ class HasContentFilter(SimpleListFilter):
 # Base Admin Classes
 class BaseModelAdmin(admin.ModelAdmin):
     """Base admin class with common functionality"""
-    
+
     def get_readonly_fields(self, request, obj=None):
-        """Make created/updated fields readonly if they exist"""
         readonly = list(super().get_readonly_fields(request, obj))
         if hasattr(self.model, 'created_at'):
             readonly.append('created_at')
@@ -47,7 +46,6 @@ class BaseModelAdmin(admin.ModelAdmin):
         return readonly
 
     def get_list_display(self, request):
-        """Add status icons to list display"""
         display = list(super().get_list_display(request))
         if 'is_active' in [f.name for f in self.model._meta.fields]:
             if 'status_icon' not in display:
@@ -65,10 +63,9 @@ class BaseModelAdmin(admin.ModelAdmin):
 
 class SingletonModelAdmin(BaseModelAdmin):
     """Admin for models that should have only one active instance"""
-    
+
     def save_model(self, request, obj, form, change):
         if obj.is_active:
-            # Ensure only one instance is active
             self.model.objects.exclude(pk=obj.pk).update(is_active=False)
         super().save_model(request, obj, form, change)
 
@@ -84,7 +81,7 @@ class MetaDataAdmin(SingletonModelAdmin):
     list_display = ('title', 'keywords_preview', 'description_preview', 'has_logo')
     list_filter = (ActiveFilter,)
     search_fields = ('title', 'description', 'keywords')
-    
+
     fieldsets = (
         ('SEO Information', {
             'fields': ('title', 'description', 'keywords'),
@@ -99,7 +96,7 @@ class MetaDataAdmin(SingletonModelAdmin):
             'classes': ('collapse',)
         }),
     )
-    
+
     def keywords_preview(self, obj):
         if obj.keywords:
             truncated = obj.keywords[:50] + '...' if len(obj.keywords) > 50 else obj.keywords
@@ -123,7 +120,7 @@ class HeroAdmin(SingletonModelAdmin):
     list_display = ('full_name', 'title', 'greeting_preview', 'bio_preview')
     list_filter = (ActiveFilter,)
     search_fields = ('full_name', 'title', 'greeting', 'bio')
-    
+
     fieldsets = (
         ('Hero Information', {
             'fields': ('greeting', 'full_name', 'title'),
@@ -157,7 +154,7 @@ class AboutAdmin(SingletonModelAdmin):
     list_display = ('about_word_count', 'avatar_preview')
     list_filter = (ActiveFilter,)
     search_fields = ('about',)
-    
+
     fieldsets = (
         ('About Content', {
             'fields': ('about',),
@@ -173,7 +170,7 @@ class AboutAdmin(SingletonModelAdmin):
             'classes': ('collapse',)
         }),
     )
-    
+
     def about_word_count(self, obj):
         if obj.about:
             word_count = len(obj.about.split())
@@ -184,12 +181,12 @@ class AboutAdmin(SingletonModelAdmin):
             )
         return format_html('<span style="color: #999;">No content</span>')
     about_word_count.short_description = 'About Content'
-    
+
     def avatar_preview(self, obj):
         if obj.avatar:
             return format_html(
                 '<img src="{}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">',
-                obj.avatar.url
+                obj.avatar
             )
         return format_html('<span style="color: #999;">No avatar</span>')
     avatar_preview.short_description = 'Avatar'
@@ -201,13 +198,13 @@ class SkillInline(admin.TabularInline):
     fields = ('title', 'icon', 'is_active')
     classes = ('collapse',)
 
-@admin.register(SlkillGroup)  # Note: Keeping original model name
+@admin.register(SlkillGroup)
 class SkillGroupAdmin(BaseModelAdmin):
     list_display = ('title', 'skill_count', 'active_skill_count')
     list_filter = (ActiveFilter,)
     search_fields = ('title',)
     inlines = [SkillInline]
-    
+
     def skill_count(self, obj):
         total = obj.skill_set.count()
         return format_html('<strong>{}</strong> total', total)
@@ -225,7 +222,7 @@ class SkillAdmin(BaseModelAdmin):
     list_filter = (ActiveFilter, 'group')
     search_fields = ('title',)
     list_select_related = ('group',)
-    
+
     fieldsets = (
         ('Skill Details', {
             'fields': ('title', 'group')
@@ -237,7 +234,7 @@ class SkillAdmin(BaseModelAdmin):
             'fields': ('is_active',)
         }),
     )
-    
+
     def icon_preview(self, obj):
         if obj.icon:
             return format_html('<i class="{}" style="font-size: 20px;"></i>', obj.icon)
@@ -253,7 +250,7 @@ class ProjectAdmin(BaseModelAdmin):
     search_fields = ('title', 'description')
     filter_horizontal = ('skill',)
     ordering = ('ordering_index',)
-    
+
     fieldsets = (
         ('Project Information', {
             'fields': ('title', 'description'),
@@ -276,12 +273,12 @@ class ProjectAdmin(BaseModelAdmin):
             'classes': ('collapse',)
         }),
     )
-    
+
     def image_preview(self, obj):
         if obj.image:
             return format_html(
                 '<img src="{}" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">',
-                obj.image.url
+                obj.image
             )
         return format_html('<span style="color: #999;">No image</span>')
     image_preview.short_description = 'Preview'
@@ -300,53 +297,33 @@ class ProjectAdmin(BaseModelAdmin):
         return format_html(' | '.join(links)) if links else format_html('<span style="color: #999;">No links</span>')
     links_available.short_description = 'Links'
 
-# Process and Steps Management
-class StepInline(admin.TabularInline):
-    model = Step
-    extra = 0
-    fields = ('title', 'description', 'is_active')
-    classes = ('collapse',)
+# Education & Achievement Management
+@admin.register(Education)
+class EducationAdmin(admin.ModelAdmin):
+    list_display = ("institution", "degree", "field_of_study", "duration_display", "order")
+    list_editable = ("order",)
+    list_filter = ("degree", "currently_studying")
+    search_fields = ("institution", "field_of_study", "description")
 
-@admin.register(Process)
-class ProcessAdmin(BaseModelAdmin):
-    list_display = ('description_preview', 'step_count', 'active_steps')
-    list_filter = (ActiveFilter,)
-    search_fields = ('description',)
-    inlines = [StepInline]
-    
-    def description_preview(self, obj):
-        if obj.description:
-            return format_html('<strong>{}</strong>', obj.description)
-        return format_html('<span style="color: #999;">No description</span>')
-    description_preview.short_description = 'Process'
+@admin.register(AchievementCategory)
+class AchievementCategoryAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug", "order")
+    prepopulated_fields = {"slug": ("name",)}
 
-    def step_count(self, obj):
-        return obj.steps.all().count()
-    step_count.short_description = 'Total Steps'
+@admin.register(Achievement)
+class AchievementAdmin(admin.ModelAdmin):
+    list_display = ("title", "category", "issuer", "date_awarded", "featured", "order")
+    list_editable = ("order", "featured")
+    list_filter = ("category", "featured")
+    search_fields = ("title", "issuer", "description")
 
-    def active_steps(self, obj):
-        active = obj.steps.filter(is_active=True).count()
-        total = obj.steps.count()
-        percentage = (active / total * 100) if total > 0 else 0
-        color = 'green' if percentage > 50 else 'orange' if percentage > 0 else 'red'
-        return format_html(
-            f'<span style="color: {color};">{active}/{total}</span>',
-        )
-    active_steps.short_description = 'Active Steps'
-
-@admin.register(Step)
-class StepAdmin(BaseModelAdmin):
-    list_display = ('title', 'process', 'description_preview')
-    list_filter = (ActiveFilter, 'process')
-    search_fields = ('title', 'description')
-    list_select_related = ('process',)
-
-    def description_preview(self, obj):
-        if obj.description:
-            truncated = obj.description[:60] + '...' if len(obj.description) > 60 else obj.description
-            return format_html('<span title="{}">{}</span>', obj.description, truncated)
-        return format_html('<span style="color: #999;">No description</span>')
-    description_preview.short_description = 'Description'
+# Exprience
+@admin.register(Experience)
+class ExperienceAdmin(admin.ModelAdmin):
+    list_display = ("role", "company", "employment_type", "duration_display", "order")
+    list_editable = ("order",)
+    list_filter = ("employment_type", "currently_working")
+    search_fields = ("company", "role", "description")
 
 # Contact Information Management
 class InfoItemInline(admin.StackedInline):
@@ -366,7 +343,7 @@ class GetInTouchAdmin(SingletonModelAdmin):
     list_display = ('title', 'info_summary', 'social_summary')
     list_filter = (ActiveFilter,)
     search_fields = ('title', 'description')
-    
+
     fieldsets = (
         ('Contact Section Content', {
             'fields': ('title', 'description'),
@@ -378,7 +355,7 @@ class GetInTouchAdmin(SingletonModelAdmin):
         }),
     )
     inlines = [InfoItemInline, SocialLinkInline]
-    
+
     def info_summary(self, obj):
         total = obj.info_items.count()
         active = obj.info_items.filter(is_active=True).count()
@@ -387,7 +364,7 @@ class GetInTouchAdmin(SingletonModelAdmin):
             active, total
         )
     info_summary.short_description = 'Info Items'
-    
+
     def social_summary(self, obj):
         total = obj.social_links.count()
         active = obj.social_links.filter(is_active=True).count()
@@ -403,7 +380,7 @@ class InfoItemAdmin(BaseModelAdmin):
     list_filter = (ActiveFilter, 'get_in_touch')
     search_fields = ('key', 'value')
     list_select_related = ('get_in_touch',)
-    
+
     fieldsets = (
         ('Information', {
             'fields': ('key', 'value', 'get_in_touch')
@@ -416,13 +393,13 @@ class InfoItemAdmin(BaseModelAdmin):
             'fields': ('is_active',)
         }),
     )
-    
+
     def value_preview(self, obj):
         if obj.value:
             return format_html('<code>{}</code>', obj.value[:40] + '...' if len(obj.value) > 40 else obj.value)
         return format_html('<span style="color: #999;">No value</span>')
     value_preview.short_description = 'Value'
-    
+
     def link_preview(self, obj):
         if obj.link:
             return format_html(
@@ -438,7 +415,7 @@ class SocialLinkAdmin(BaseModelAdmin):
     list_filter = (ActiveFilter, 'get_in_touch')
     search_fields = ('title', 'link')
     list_select_related = ('get_in_touch',)
-    
+
     fieldsets = (
         ('Social Platform', {
             'fields': ('title', 'link', 'get_in_touch')
@@ -451,7 +428,7 @@ class SocialLinkAdmin(BaseModelAdmin):
             'fields': ('is_active',)
         }),
     )
-    
+
     def link_preview(self, obj):
         if obj.link:
             domain = obj.link.split('/')[2] if '://' in obj.link else obj.link.split('/')[0]
@@ -472,11 +449,11 @@ class SocialLinkAdmin(BaseModelAdmin):
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
     list_display = ('name', 'email', 'message_preview', 'submission_date')
-    list_filter = ('created_at',) if hasattr(Message, 'created_at') else ()
+    list_filter = ('created',)
     search_fields = ('name', 'email', 'message')
-    readonly_fields = ('name', 'email', 'message', 'created_at') if hasattr(Message, 'created_at') else ('name', 'email', 'message')
-    date_hierarchy = 'created_at' if hasattr(Message, 'created_at') else None
-    
+    readonly_fields = ('name', 'email', 'message', 'created')
+    date_hierarchy = 'created'
+
     fieldsets = (
         ('Contact Information', {
             'fields': ('name', 'email')
@@ -486,11 +463,11 @@ class MessageAdmin(admin.ModelAdmin):
             'classes': ('wide',)
         }),
         ('Metadata', {
-            'fields': ('created_at',) if hasattr(Message, 'created_at') else (),
+            'fields': ('created',),
             'classes': ('collapse',)
         }),
     )
-    
+
     def message_preview(self, obj):
         if obj.message:
             lines = obj.message.split('\n')
@@ -504,17 +481,17 @@ class MessageAdmin(admin.ModelAdmin):
     message_preview.short_description = 'Message'
 
     def submission_date(self, obj):
-        if hasattr(obj, 'created_at') and obj.created_at:
+        if obj.created:
             return format_html(
                 '<span title="{}">{}</span>',
-                obj.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                obj.created_at.strftime('%b %d, %Y')
+                obj.created.strftime('%Y-%m-%d %H:%M:%S'),
+                obj.created.strftime('%b %d, %Y')
             )
         return format_html('<span style="color: #999;">Unknown</span>')
     submission_date.short_description = 'Submitted'
 
     def has_add_permission(self, request):
-        return False  # Don't allow adding messages through admin
+        return False
 
 # Sections Management
 admin.site.register(Sections)
@@ -523,25 +500,3 @@ admin.site.register(Sections)
 admin.site.site_header = "🎨 Portfolio Admin Dashboard"
 admin.site.site_title = "Portfolio Admin"
 admin.site.index_title = "Welcome to Your Portfolio Administration Panel"
-
-# Add custom CSS
-def custom_admin_css():
-    return """
-    <style>
-        .admin-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .module h2, .module caption, .inline-group h2 { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .button, input[type=submit], input[type=button], .submit-row input, .button.default {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-        }
-        .object-tools a:link, .object-tools a:visited {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-        }
-    </style>
-    """
-
-# You can add this to your base template or create a custom admin template

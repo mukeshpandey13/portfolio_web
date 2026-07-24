@@ -6,7 +6,7 @@
             <div class="bg-black border border-zinc-800 rounded-sm overflow-hidden hover-card group">
                 <div class="h-56 md:h-80 lg:h-80 bg-zinc-800 relative overflow-hidden">
                     {% if project.image %}
-                    <img src="{{project.image.url}}" loading="lazy" alt="{{project.title}}" class="w-full">
+                    <img src="{{project.image}}" loading="lazy" alt="{{project.title}}" class="w-full">
                     {% else %}
                     <div class="w-full h-full flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-24 h-24 lg:h-32 lg:w-32 text-gray-600" fill="none"
