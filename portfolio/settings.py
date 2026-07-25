@@ -18,7 +18,7 @@ debug = os.getenv('DEBUG')
 DEBUG = True if debug == 'True' else False
 
 # ALLOWED_HOSTS = ['127.0.0.1']
-ALLOWED_HOSTS = ['.railway.app', '127.0.0.1']
+ALLOWED_HOSTS = ['.railway.app', '.onrender.com', '127.0.0.1']
 
 CSRF_TRUSTED_ORIGINS = []
 
