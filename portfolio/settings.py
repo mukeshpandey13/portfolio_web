@@ -18,6 +18,7 @@ debug = os.getenv('DEBUG')
 DEBUG = True if debug == 'True' else False
 
 # ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['.railway.app', '127.0.0.1']
 
 CSRF_TRUSTED_ORIGINS = []
 
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',   # add this line
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -113,7 +115,9 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR / 'static')
 
-STATICFILES_DIRS = [ os.path.join(BASE_DIR / "statics"), ]
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# STATICFILES_DIRS = [ os.path.join(BASE_DIR / "statics"), ]
 
 MEDIA_URL = '/media/'
 
@@ -130,3 +134,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ### for chatbot
 SESSION_COOKIE_AGE = 86400
+
+
